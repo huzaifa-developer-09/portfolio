@@ -244,28 +244,43 @@ const Play = () => {
     setChatInput('');
     setIsTyping(true);
 
+    const replies = [
+      "Hey! I'm Huzaifa 👋 I'm an AI & Full-Stack Developer based in Karachi. Ask me about my projects or skills!",
+      "I work with React, TypeScript, Node.js, Python, Three.js, and a bunch of other cool stuff 🚀",
+      "My most exciting project is probably Drishti — a custom LLM chatbot I built using PyTorch and Transformers 🤖",
+      "I also built VoteChain, a decentralized election system on Ethereum using Solidity and Web3.js ⛓️",
+      "RedxChess (the engine you're playing against right now!) is one of my favorites — it's rated 3640 ELO 🎯",
+      "Feel free to reach out at huzaifazafar.com@gmail.com or on LinkedIn! 😊",
+      "I'm currently working as a Senior Full-Stack Developer at 360Xperts, building scalable web apps and SaaS products.",
+    ];
+
     try {
-      // Offline fallback — no backend required for local development
-      await new Promise(res => setTimeout(res, 600)); // simulate slight delay
-      const replies = [
-        "Hey! I'm Huzaifa 👋 I'm an AI & Full-Stack Developer based in Karachi. Ask me about my projects or skills!",
-        "I work with React, TypeScript, Node.js, Python, Three.js, and a bunch of other cool stuff 🚀",
-        "My most exciting project is probably Drishti — a custom LLM chatbot I built using PyTorch and Transformers 🤖",
-        "I also built VoteChain, a decentralized election system on Ethereum using Solidity and Web3.js ⛓️",
-        "RedxChess (the engine you're playing against right now!) is one of my favorites — it's rated 3640 ELO 🎯",
-        "Feel free to reach out at huzaifazafar.com@gmail.com or on LinkedIn! 😊",
-        "I'm currently working as a Senior Full-Stack Developer at 360Xperts, building scalable web apps and SaaS products.",
-      ];
-      const content = replies[Math.floor(Math.random() * replies.length)];
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: [
+            { role: 'system', content: SYSTEM_PROMPT },
+            ...chatMessages,
+            userMessage,
+          ],
+        }),
+      });
+
+      if (!response.ok) throw new Error(`Chat API returned ${response.status}`);
+
+      const data = await response.json();
+      const content = data?.choices?.[0]?.message?.content;
+      if (typeof content !== 'string' || !content.trim()) {
+        throw new Error('Chat API returned an empty response');
+      }
+
       const assistantMessage: ChatMessage = { role: 'assistant', content };
       setChatMessages(prev => [...prev, assistantMessage]);
     } catch (error) {
       console.error('Chat error:', error);
-      const errorMessage: ChatMessage = {
-        role: 'assistant',
-        content: 'Sorry, having some connection issues. Try again? 😅'
-      };
-      setChatMessages(prev => [...prev, errorMessage]);
+      const content = replies[Math.floor(Math.random() * replies.length)];
+      setChatMessages(prev => [...prev, { role: 'assistant', content }]);
     } finally {
       setIsTyping(false);
     }
