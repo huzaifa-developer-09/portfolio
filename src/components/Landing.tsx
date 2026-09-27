@@ -35,7 +35,6 @@ const Landing = ({ children }: PropsWithChildren) => {
               src="/images/mypicnbg.png"
               alt="HUZAIFA ZAFAR"
               loading="eager"
-              fetchPriority="high"
               decoding="async"
             />
           </div>

@@ -13,6 +13,8 @@ import { config } from "../config";
 const SocialIcons = () => {
   useEffect(() => {
     const social = document.getElementById("social") as HTMLElement;
+    if (!social) return;
+    const cleanups: Array<() => void> = [];
 
     social.querySelectorAll("span").forEach((item) => {
       const elem = item as HTMLElement;
@@ -24,14 +26,18 @@ const SocialIcons = () => {
       let currentX = 0;
       let currentY = 0;
 
+      let frameId: number | null = null;
       const updatePosition = () => {
+        frameId = null;
         currentX += (mouseX - currentX) * 0.1;
         currentY += (mouseY - currentY) * 0.1;
 
         link.style.setProperty("--siLeft", `${currentX}px`);
         link.style.setProperty("--siTop", `${currentY}px`);
 
-        requestAnimationFrame(updatePosition);
+        if (Math.abs(mouseX - currentX) > 0.1 || Math.abs(mouseY - currentY) > 0.1) {
+          frameId = requestAnimationFrame(updatePosition);
+        }
       };
 
       const onMouseMove = (e: MouseEvent) => {
@@ -45,16 +51,18 @@ const SocialIcons = () => {
           mouseX = rect.width / 2;
           mouseY = rect.height / 2;
         }
+        if (frameId === null) frameId = requestAnimationFrame(updatePosition);
       };
 
-      document.addEventListener("mousemove", onMouseMove);
+      document.addEventListener("mousemove", onMouseMove, { passive: true });
+      frameId = requestAnimationFrame(updatePosition);
 
-      updatePosition();
-
-      return () => {
-        elem.removeEventListener("mousemove", onMouseMove);
-      };
+      cleanups.push(() => {
+        document.removeEventListener("mousemove", onMouseMove);
+        if (frameId !== null) cancelAnimationFrame(frameId);
+      });
     });
+    return () => cleanups.forEach((cleanup) => cleanup());
   }, []);
 
   return (

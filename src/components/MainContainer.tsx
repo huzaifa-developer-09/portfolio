@@ -20,13 +20,19 @@ const MainContainer = ({ children }: PropsWithChildren) => {
   const [shouldRenderCharacter, setShouldRenderCharacter] = useState(false);
 
   useEffect(() => {
+    let resizeFrame = 0;
     const resizeHandler = () => {
-      setSplitText();
-      setIsDesktopView(window.innerWidth > 1024);
+      if (resizeFrame) return;
+      resizeFrame = requestAnimationFrame(() => {
+        resizeFrame = 0;
+        setSplitText();
+        setIsDesktopView(window.innerWidth > 1024);
+      });
     };
     resizeHandler();
     window.addEventListener("resize", resizeHandler);
     return () => {
+      if (resizeFrame) cancelAnimationFrame(resizeFrame);
       window.removeEventListener("resize", resizeHandler);
     };
   }, []);
@@ -44,9 +50,9 @@ const MainContainer = ({ children }: PropsWithChildren) => {
     const mountCharacter = () => setShouldRenderCharacter(true);
 
     if (typeof win.requestIdleCallback === "function") {
-      idleId = win.requestIdleCallback(mountCharacter, { timeout: 1500 });
+      idleId = win.requestIdleCallback(mountCharacter, { timeout: 300 });
     } else {
-      timeoutId = setTimeout(mountCharacter, 1200);
+      timeoutId = setTimeout(mountCharacter, 100);
     }
 
     return () => {

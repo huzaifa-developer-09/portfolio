@@ -470,6 +470,10 @@
     box-sizing: border-box;
   }
 
+  .what-box:last-child {
+    height: auto !important;
+  }
+
   /* Title */
   .what-box h2 {
     font-size: clamp(40px, 12vw, 60px) !important;
@@ -487,7 +491,7 @@
     width: 100% !important;
     display: flex !important;
     flex-direction: column !important;
-    gap: 24px !important;
+    gap: 20px !important;
   }
 
   .what-content {

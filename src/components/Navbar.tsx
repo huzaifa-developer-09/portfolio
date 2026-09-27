@@ -13,7 +13,7 @@ const Navbar = () => {
     // Initialize Lenis smooth scroll — desktop only
     if (window.innerWidth <= 1024) return;
 
-    lenis = new Lenis({
+    const instance = new Lenis({
       duration: 1.7,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       orientation: "vertical",
@@ -23,46 +23,55 @@ const Navbar = () => {
       touchMultiplier: 2,
       infinite: false,
     });
+    lenis = instance;
 
     // Start paused
     lenis.stop();
 
     // Handle smooth scroll animation frame
+    let frameId = 0;
     function raf(time: number) {
-      lenis?.raf(time);
-      requestAnimationFrame(raf);
+      instance.raf(time);
+      frameId = requestAnimationFrame(raf);
     }
-    requestAnimationFrame(raf);
+    frameId = requestAnimationFrame(raf);
 
     // Handle navigation links
-    let links = document.querySelectorAll(".header ul a");
-    links.forEach((elem) => {
-      let element = elem as HTMLAnchorElement;
-      element.addEventListener("click", (e) => {
+    const links = document.querySelectorAll(".header ul a");
+    const linkHandlers = Array.from(links, (elem) => {
+      const element = elem as HTMLAnchorElement;
+      const onClick = (e: MouseEvent) => {
         if (window.innerWidth > 1024) {
           e.preventDefault();
-          let elem = e.currentTarget as HTMLAnchorElement;
-          let section = elem.getAttribute("data-href");
-          if (section && lenis) {
+          const elem = e.currentTarget as HTMLAnchorElement;
+          const section = elem.getAttribute("data-href");
+          if (section) {
             const target = document.querySelector(section) as HTMLElement;
             if (target) {
-              lenis.scrollTo(target, {
+              instance.scrollTo(target, {
                 offset: 0,
                 duration: 1.5,
               });
             }
           }
         }
-      });
+      };
+      element.addEventListener("click", onClick);
+      return { element, onClick };
     });
 
     // Handle resize
-    window.addEventListener("resize", () => {
-      lenis?.resize();
-    });
+    const onResize = () => instance.resize();
+    window.addEventListener("resize", onResize, { passive: true });
 
     return () => {
-      lenis?.destroy();
+      cancelAnimationFrame(frameId);
+      window.removeEventListener("resize", onResize);
+      linkHandlers.forEach(({ element, onClick }) => {
+        element.removeEventListener("click", onClick);
+      });
+      instance.destroy();
+      if (lenis === instance) lenis = null;
     };
   }, []);
   return (

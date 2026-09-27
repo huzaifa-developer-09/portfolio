@@ -3,6 +3,7 @@ import {
   PropsWithChildren,
   useContext,
   useEffect,
+  useMemo,
   useState,
 } from "react";
 import Loading from "../components/Loading";
@@ -17,34 +18,33 @@ export const LoadingContext = createContext<LoadingType | null>(null);
 
 export const LoadingProvider = ({ children }: PropsWithChildren) => {
   const [isLoading, setIsLoading] = useState(() => {
-    // Skip loading on mobile
-    if (window.innerWidth <= 768) return false;
+    // The 3D scene only mounts on desktop.
+    if (window.innerWidth <= 1024) return false;
     return true;
   });
   const [loading, setLoading] = useState(0);
 
-  const value = {
-    isLoading,
-    setIsLoading,
-    setLoading,
-  };
+  const value = useMemo(
+    () => ({ isLoading, setIsLoading, setLoading }),
+    [isLoading]
+  );
   useEffect(() => {
-    // Auto-start animations on tablet/mobile since there's no 3D model
-    if (window.innerWidth <= 1024) {
-      import("../components/utils/initialFX").then((module) => {
-        if (module.initialFX) {
-          setTimeout(() => {
-            module.initialFX();
-          }, 100);
-        }
-      });
-    }
+    if (window.innerWidth > 1024) return;
+    let cancelled = false;
+    let timeoutId: number | undefined;
+    import("../components/utils/initialFX").then((module) => {
+      if (!cancelled && module.initialFX) {
+        timeoutId = window.setTimeout(module.initialFX, 100);
+      }
+    });
+    return () => {
+      cancelled = true;
+      if (timeoutId !== undefined) window.clearTimeout(timeoutId);
+    };
   }, []);
 
-  useEffect(() => {}, [loading]);
-
   return (
-    <LoadingContext.Provider value={value as LoadingType}>
+    <LoadingContext.Provider value={value}>
       {isLoading && <Loading percent={loading} />}
       <main className="main-body">{children}</main>
     </LoadingContext.Provider>
