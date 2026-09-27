@@ -487,7 +487,7 @@
     width: 100% !important;
     display: flex !important;
     flex-direction: column !important;
-    gap: 16px !important;
+    gap: 24px !important;
   }
 
   .what-content {
