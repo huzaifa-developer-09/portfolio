@@ -63,7 +63,7 @@ Contact and links:
 - GitHub: https://github.com/huzaifa-zafar-repo
 - LinkedIn: https://www.linkedin.com/in/huzaifa-zafar-mernstack/
 - WhatsApp: https://wa.me/923120031236
-- Instagram: https://www.instagram.com/xentro_labs/
+- Instagram: https://www.instagram.com/huzaifa_zafar_01/
 - Email: huzaifazafar.com@gmail.com
 
 Conversation rules:

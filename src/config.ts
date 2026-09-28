@@ -115,7 +115,7 @@ export const config = {
         github: "https://github.com/huzaifa-zafar-repo",
         linkedin: "https://www.linkedin.com/in/huzaifa-zafar-mernstack/",
         whatsapp: "https://wa.me/923120031236",
-        instagram: "https://www.instagram.com/xentro_labs/"
+        instagram: "https://www.instagram.com/huzaifa_zafar_01/"
     },
     skills: {
         develop: {
